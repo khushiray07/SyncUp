@@ -1,13 +1,16 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 export function OnboardingSlideOne() {
   return (
     <View style={styles.mainContent}>
-      <View style={styles.illustrationPlaceholder}>
-        <Text style={styles.placeholderText}>Illustration</Text>
-        
-      </View>
+      <View style={styles.illustrationWrapper}>
+  <Image
+    source={require('../../assets/images/onboardingone.png')}
+    style={styles.illustrationImage}
+    resizeMode="contain"
+  />
+</View>
 
       <Text style={styles.title}>
         See everyone's holidays in one place
@@ -16,48 +19,49 @@ export function OnboardingSlideOne() {
       <Text style={styles.description}>
         Centralize multiple schedules into a single high-definition view for seamless planning.
       </Text>
-
-      <View style={styles.progressContainer}>
-        <View style={[styles.progressDot, styles.progressDotActive]} />
-        <View style={styles.progressDot} />
-        <View style={styles.progressDot} />
-      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   mainContent: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
+  flex: 1,
+  backgroundColor: '#FFFFFF',
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingHorizontal: 24,
+  paddingBottom: 20,
+},
 
-  illustrationPlaceholder: {
-    width: 280,
-    height: 260,
-    backgroundColor: '#E5F0FF',
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 32,
-  },
+illustrationWrapper: {
+  width: '90%',
+  height: 260,
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginBottom: 34,
+  borderRadius: 28,
+  backgroundColor: '#F8FBFF',
 
-  placeholderText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1A56DB',
-  },
+  shadowColor: '#1A56DB',
+  shadowOffset: { width: 0, height: 12 },
+  shadowOpacity: 0.08,
+  shadowRadius: 24,
+  elevation: 6,
+},
+
+illustrationImage: {
+  width: '100%',
+  height: '100%',
+},
 
   title: {
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: '800',
     color: '#111827',
     textAlign: 'center',
-    lineHeight: 42,
+    lineHeight: 38,
     marginBottom: 16,
+    maxWidth: 340,
   },
 
   description: {
@@ -66,24 +70,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 28,
     maxWidth: 330,
-  },
-
-  progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 28,
-  },
-
-  progressDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#D1D5DB',
-  },
-
-  progressDotActive: {
-    width: 32,
-    backgroundColor: '#1A56DB',
   },
 });

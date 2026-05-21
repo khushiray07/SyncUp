@@ -1,15 +1,16 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useRouter } from 'expo-router';
 
 import { OnboardingFooter } from '../components/onboarding/OnboardingFooter';
 import { OnboardingHeader } from '../components/onboarding/OnboardingHeader';
 import { OnboardingSlideOne } from '../components/onboarding/OnboardingSlideOne';
-import { OnboardingSlideTwo } from '../components/onboarding/OnboardingSlideTwo';
 import { OnboardingSlideThree } from '../components/onboarding/OnboardingSlideThree';
+import { OnboardingSlideTwo } from '../components/onboarding/OnboardingSlideTwo';
 
 export default function OnboardingScreen() {
+  const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const handleBack = () => {
@@ -19,14 +20,15 @@ export default function OnboardingScreen() {
   };
 
   const handleNext = () => {
-  if (currentSlide < 2) {
-    setCurrentSlide(currentSlide + 1);
-  } else {
-    router.replace('/home');
-  }
-};
+    if (currentSlide < 2) {
+      setCurrentSlide(currentSlide + 1);
+    } else {
+      router.replace('/home');
+    }
+  };
+
   const handleSkip = () => {
-    console.log('Skip pressed');
+    router.replace('/signup');
   };
 
   return (
@@ -34,8 +36,8 @@ export default function OnboardingScreen() {
       <OnboardingHeader onSkip={handleSkip} />
 
       {currentSlide === 0 && <OnboardingSlideOne />}
-{currentSlide === 1 && <OnboardingSlideTwo />}
-{currentSlide === 2 && <OnboardingSlideThree />}
+      {currentSlide === 1 && <OnboardingSlideTwo />}
+      {currentSlide === 2 && <OnboardingSlideThree />}
 
       <OnboardingFooter
         onBack={handleBack}

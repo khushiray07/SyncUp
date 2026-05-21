@@ -17,28 +17,19 @@ export function OnboardingFooter({
 }: OnboardingFooterProps) {
   return (
     <View style={styles.bottomNav}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={onBack}
-        disabled={isBackDisabled}
-      >
-        <MaterialIcons
-          name="arrow-back"
-          size={24}
-          color={isBackDisabled ? '#9CA3AF' : '#1A56DB'}
-        />
-        <Text
-          style={[
-            styles.backText,
-            { color: isBackDisabled ? '#9CA3AF' : '#1A56DB' },
-          ]}
-        >
-          Back
-        </Text>
-      </TouchableOpacity>
+      {isBackDisabled ? (
+        <View style={styles.backButtonPlaceholder} />
+      ) : (
+        <TouchableOpacity style={styles.backButton} onPress={onBack}>
+          <MaterialIcons name="arrow-back" size={24} color="#1A56DB" />
+          <Text style={[styles.backText, { color: '#1A56DB' }]}>
+            Back
+          </Text>
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity style={styles.nextButton} onPress={onNext}>
-<Text style={styles.nextText}>{nextLabel}</Text>
+        <Text style={styles.nextText}>{nextLabel}</Text>
         <MaterialIcons name="arrow-forward" size={24} color="#FFFFFF" />
       </TouchableOpacity>
     </View>
@@ -47,15 +38,15 @@ export function OnboardingFooter({
 
 const styles = StyleSheet.create({
   bottomNav: {
-  height: 96,
-  backgroundColor: '#FFFFFF',
-  borderTopWidth: 1,
-  borderTopColor: '#E5E7EB',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  paddingHorizontal: 32,
-},
+    height: 96,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
 
   backButton: {
     flexDirection: 'row',
@@ -63,6 +54,10 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 8,
+  },
+
+  backButtonPlaceholder: {
+    width: 90,
   },
 
   backText: {

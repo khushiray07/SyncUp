@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image,ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export function OnboardingSlideThree() {
   return (
@@ -23,11 +23,7 @@ export function OnboardingSlideThree() {
 </View>
 
       <View style={styles.contentCard}>
-        <View style={styles.progressLines}>
-          <View style={styles.inactiveLine} />
-          <View style={styles.inactiveLine} />
-          <View style={styles.activeLine} />
-        </View>
+        
 
         <Text style={styles.title}>
           Plan trips and meetups instantly
@@ -95,26 +91,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
 
-  progressLines: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 28,
-  },
-
-  inactiveLine: {
-    width: 56,
-    height: 8,
-    borderRadius: 10,
-    backgroundColor: '#DBEAFE',
-  },
-
-  activeLine: {
-    width: 86,
-    height: 8,
-    borderRadius: 10,
-    backgroundColor: '#1A56DB',
-  },
-
+  
   title: {
     fontSize: 34,
     fontWeight: '800',

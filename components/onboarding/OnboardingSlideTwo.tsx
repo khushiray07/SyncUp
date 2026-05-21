@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 import { GroupAvailabilityCard } from './GroupAvailabilityCard';
 
 export function OnboardingSlideTwo() {
@@ -9,11 +9,7 @@ export function OnboardingSlideTwo() {
       contentContainerStyle={styles.mainContent}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.progressLines}>
-        <View style={styles.inactiveLine} />
-        <View style={styles.activeLine} />
-        <View style={styles.inactiveLine} />
-      </View>
+      
 
       <GroupAvailabilityCard />
 
@@ -41,26 +37,7 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
 
-  progressLines: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 4,
-    marginBottom: 28,
-  },
-
-  inactiveLine: {
-    width: 56,
-    height: 8,
-    borderRadius: 10,
-    backgroundColor: '#DBEAFE',
-  },
-
-  activeLine: {
-    width: 86,
-    height: 8,
-    borderRadius: 10,
-    backgroundColor: '#1A56DB',
-  },
+  
 
   title: {
   fontSize: 32,
