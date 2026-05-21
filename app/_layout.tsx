@@ -16,6 +16,14 @@ export default function RootLayout() {
           options={{ headerShown: false }} 
         />
         <Stack.Screen
+  name="company-search"
+  options={{ headerShown: false }}
+/>
+<Stack.Screen
+  name="company-holidays"
+  options={{ headerShown: false }}
+/>
+        <Stack.Screen
   name="signup"
   options={{ headerShown: false }}
 />

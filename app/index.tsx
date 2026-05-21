@@ -23,12 +23,12 @@ export default function OnboardingScreen() {
     if (currentSlide < 2) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      router.replace('/home');
+      router.replace('/company-search');
     }
   };
 
   const handleSkip = () => {
-    router.replace('/signup');
+    router.replace('/company-search');
   };
 
   return (
