@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "tonyStark",
-    "slug": "tonyStark",
+    "name": "SyncUp",
+    "slug": "SyncUp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "tonystark",
+    "scheme": "syncup",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
