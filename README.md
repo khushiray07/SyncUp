@@ -16,6 +16,21 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npx expo start
    ```
 
+## Firebase setup
+
+1. Copy `.env.example` to `.env`.
+2. Fill `.env` with the Firebase Web App config for project `syncup-98f58`.
+3. Keep each value unquoted and do not add commas or semicolons.
+
+To seed local company holiday data, place a Firebase Admin service account file
+at `serviceAccountKey.json`, then run:
+
+```bash
+npm run seed:holidays
+```
+
+Both `.env` and `serviceAccountKey.json` are ignored by Git.
+
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
