@@ -1,52 +1,155 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const holidays = [
-  {
-    date: '01',
-    month: 'JAN',
-    title: 'New Year',
-    type: 'Public Holiday',
-  },
-  {
-    date: '25',
-    month: 'MAR',
-    title: 'Holi',
-    type: 'Festival',
-  },
-  {
-    date: '15',
-    month: 'AUG',
-    title: 'Independence Day',
-    type: 'Public Holiday',
-  },
-  {
-    date: '31',
-    month: 'OCT',
-    title: 'Diwali',
-    type: 'Festival',
-  },
-  {
-    date: '25',
-    month: 'DEC',
-    title: 'Christmas',
-    type: 'Public Holiday',
-  },
+import { CompanyHoliday, getCompanyHolidays } from '../lib/companyService';
+
+const fallbackHolidaysByCompany: Record<string, CompanyHoliday[]> = {
+  infosys: [
+    {
+      id: 'diwali',
+      title: 'Diwali',
+      date: '2024-10-31',
+      type: 'Festival',
+    },
+    {
+      id: 'new-year',
+      title: 'New Year',
+      date: '2026-01-01',
+      type: 'Public Holiday',
+    },
+    {
+      id: 'holi',
+      title: 'Holi',
+      date: '2026-03-25',
+      type: 'Festival',
+    },
+  ],
+};
+const emptyHolidays: CompanyHoliday[] = [];
+
+const monthLabels = [
+  'JAN',
+  'FEB',
+  'MAR',
+  'APR',
+  'MAY',
+  'JUN',
+  'JUL',
+  'AUG',
+  'SEP',
+  'OCT',
+  'NOV',
+  'DEC',
 ];
+
+function formatHolidayDate(dateString?: string) {
+  if (!dateString || typeof dateString !== 'string') {
+    return {
+      day: '--',
+      month: '',
+    };
+  }
+
+  const [year, month, day] = dateString.trim().split('-').map(Number);
+
+  if (!year || !month || !day || month < 1 || month > 12) {
+    return {
+      day: '--',
+      month: '',
+    };
+  }
+
+  return {
+    day: String(day).padStart(2, '0'),
+    month: monthLabels[month - 1],
+  };
+}
 
 export default function CompanyHolidaysScreen() {
   const router = useRouter();
-  const { company } = useLocalSearchParams();
+  const params = useLocalSearchParams();
 
-  const companyName = typeof company === 'string' ? company : 'Infosys';
+  const selectedCompanyId =
+    typeof params.companyId === 'string' && params.companyId.trim()
+      ? params.companyId.trim().toLowerCase()
+      : 'infosys';
+
+  const companyName =
+    typeof params.companyName === 'string' && params.companyName.trim()
+      ? params.companyName
+      : 'Infosys';
+
+  const fallbackHolidays =
+    fallbackHolidaysByCompany[selectedCompanyId] ?? emptyHolidays;
+  const [holidays, setHolidays] =
+    useState<CompanyHoliday[]>(fallbackHolidays);
+  const [isLoading, setIsLoading] = useState(fallbackHolidays.length === 0);
+  const [hasError, setHasError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadHolidays() {
+      try {
+        setIsLoading(fallbackHolidays.length === 0);
+        setHasError(false);
+        setHolidays(fallbackHolidays);
+
+        const firebaseHolidays = await getCompanyHolidays(selectedCompanyId);
+
+        if (isMounted) {
+          setHolidays(
+            firebaseHolidays.length > 0 ? firebaseHolidays : fallbackHolidays
+          );
+        }
+      } catch (error) {
+        if (isMounted) {
+          setHasError(fallbackHolidays.length === 0);
+          setHolidays(fallbackHolidays);
+        }
+
+        if (fallbackHolidays.length === 0) {
+          console.warn(`Unable to load holidays for ${selectedCompanyId}:`, error);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadHolidays();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fallbackHolidays, reloadKey, selectedCompanyId]);
+
+  const displayedYear =
+    holidays
+      .map((holiday) => Number(holiday.date?.slice(0, 4)))
+      .filter(Number.isFinite)
+      .sort((first, second) => second - first)[0] ??
+    new Date().getFullYear();
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          activeOpacity={0.75}
+        >
           <MaterialIcons name="arrow-back" size={24} color="#0647C7" />
         </TouchableOpacity>
 
@@ -62,26 +165,67 @@ export default function CompanyHolidaysScreen() {
       >
         <View style={styles.heroCard}>
           <Text style={styles.companyName}>{companyName} Holidays</Text>
-          <Text style={styles.subtitle}>Upcoming holidays for 2024</Text>
+          <Text style={styles.subtitle}>
+            Upcoming holidays for {displayedYear}
+          </Text>
         </View>
 
         <Text style={styles.sectionTitle}>Holiday List</Text>
 
-        {holidays.map((holiday) => (
-          <View key={`${holiday.date}-${holiday.title}`} style={styles.holidayItem}>
-            <View style={styles.dateBox}>
-              <Text style={styles.dateText}>{holiday.date}</Text>
-              <Text style={styles.monthText}>{holiday.month}</Text>
-            </View>
-
-            <View style={styles.holidayInfo}>
-              <Text style={styles.holidayTitle}>{holiday.title}</Text>
-              <Text style={styles.holidayType}>{holiday.type}</Text>
-            </View>
-
-            <MaterialIcons name="chevron-right" size={24} color="#CBD5E1" />
+        {isLoading && (
+          <View style={styles.stateCard}>
+            <Text style={styles.stateText}>Loading holidays...</Text>
           </View>
-        ))}
+        )}
+
+        {!isLoading && hasError && (
+          <View style={styles.stateCard}>
+            <Text style={styles.errorText}>
+              Unable to load holidays. Check your connection and try again.
+            </Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={() => setReloadKey((current) => current + 1)}
+            >
+              <Text style={styles.retryText}>Try again</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {!isLoading && !hasError && holidays.length === 0 && (
+          <View style={styles.stateCard}>
+            <Text style={styles.stateText}>
+              No holidays found for this company.
+            </Text>
+          </View>
+        )}
+
+        {!isLoading &&
+          !hasError &&
+          holidays.map((holiday) => {
+            const formattedDate = formatHolidayDate(holiday.date);
+
+            return (
+              <View key={holiday.id} style={styles.holidayItem}>
+                <View style={styles.dateBox}>
+                  <Text style={styles.dateText}>{formattedDate.day}</Text>
+                  <Text style={styles.monthText}>{formattedDate.month}</Text>
+                </View>
+
+                <View style={styles.holidayInfo}>
+                  <Text style={styles.holidayTitle}>
+                    {holiday.title || 'Untitled Holiday'}
+                  </Text>
+
+                  <Text style={styles.holidayType}>
+                    {holiday.type || 'Holiday'}
+                  </Text>
+                </View>
+
+                <MaterialIcons name="chevron-right" size={24} color="#CBD5E1" />
+              </View>
+            );
+          })}
       </ScrollView>
     </SafeAreaView>
   );
@@ -218,5 +362,38 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#64748B',
     marginTop: 4,
+  },
+
+  stateCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 18,
+  },
+
+  stateText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+
+  errorText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#DC2626',
+  },
+
+  retryButton: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#1A56DB',
+    borderRadius: 10,
+    marginTop: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+
+  retryText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
   },
 });

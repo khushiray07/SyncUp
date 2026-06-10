@@ -8,19 +8,24 @@ import {
     View,
 } from 'react-native';
 
-const quickCompanies = ['Infosys', 'TCS', 'Wipro', 'Accenture', 'Google', 'Microsoft'];
+type QuickCompany = {
+  id: string;
+  name: string;
+};
 
 interface CompanySearchCardProps {
   companyName: string;
   selectedCompany: string;
+  companies: QuickCompany[];
   onChangeCompany: (value: string) => void;
-  onSelectCompany: (value: string) => void;
+  onSelectCompany: (value: QuickCompany) => void;
   onViewHolidays: () => void;
 }
 
 export function CompanySearchCard({
   companyName,
   selectedCompany,
+  companies,
   onChangeCompany,
   onSelectCompany,
   onViewHolidays,
@@ -41,17 +46,17 @@ export function CompanySearchCard({
       <Text style={styles.quickTitle}>Quick selection</Text>
 
       <View style={styles.chipsContainer}>
-        {quickCompanies.map((company) => {
-          const isSelected = selectedCompany === company;
+        {companies.map((company) => {
+          const isSelected = selectedCompany === company.name;
 
           return (
             <TouchableOpacity
-              key={company}
+              key={company.id}
               style={[styles.chip, isSelected && styles.chipSelected]}
               onPress={() => onSelectCompany(company)}
             >
               <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
-                {company}
+                {company.name}
               </Text>
             </TouchableOpacity>
           );
