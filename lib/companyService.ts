@@ -77,12 +77,12 @@ export async function getCompanies(): Promise<Company[]> {
 export async function getCompanyHolidays(
   companyId: string
 ): Promise<CompanyHoliday[]> {
-  const normalizedCompanyId = companyId.toLowerCase().trim();
-  const path = `companies/${normalizedCompanyId}/holidays`;
+  const companyDocumentId = companyId.trim();
+  const path = `companies/${companyDocumentId}/holidays`;
 
   try {
     const snapshot = await getDocs(
-      collection(db, 'companies', normalizedCompanyId, 'holidays')
+      collection(db, 'companies', companyDocumentId, 'holidays')
     );
 
     return snapshot.docs

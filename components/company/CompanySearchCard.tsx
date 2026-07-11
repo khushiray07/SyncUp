@@ -17,6 +17,10 @@ interface CompanySearchCardProps {
   companyName: string;
   selectedCompany: string;
   companies: QuickCompany[];
+  isLoadingCompanies: boolean;
+  companyLoadError: string;
+  selectionError: string;
+  isViewDisabled: boolean;
   onChangeCompany: (value: string) => void;
   onSelectCompany: (value: QuickCompany) => void;
   onViewHolidays: () => void;
@@ -26,6 +30,10 @@ export function CompanySearchCard({
   companyName,
   selectedCompany,
   companies,
+  isLoadingCompanies,
+  companyLoadError,
+  selectionError,
+  isViewDisabled,
   onChangeCompany,
   onSelectCompany,
   onViewHolidays,
@@ -45,25 +53,56 @@ export function CompanySearchCard({
 
       <Text style={styles.quickTitle}>Quick selection</Text>
 
-      <View style={styles.chipsContainer}>
-        {companies.map((company) => {
-          const isSelected = selectedCompany === company.name;
+      {isLoadingCompanies && (
+        <Text style={styles.stateText}>Loading companies...</Text>
+      )}
 
-          return (
-            <TouchableOpacity
-              key={company.id}
-              style={[styles.chip, isSelected && styles.chipSelected]}
-              onPress={() => onSelectCompany(company)}
-            >
-              <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
-                {company.name}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      {!isLoadingCompanies && companyLoadError.length > 0 && (
+        <Text style={styles.errorText}>{companyLoadError}</Text>
+      )}
 
-      <TouchableOpacity style={styles.button} onPress={onViewHolidays}>
+      {!isLoadingCompanies &&
+        companyLoadError.length === 0 &&
+        companies.length === 0 && (
+          <Text style={styles.stateText}>No companies found.</Text>
+        )}
+
+      {!isLoadingCompanies &&
+        companyLoadError.length === 0 &&
+        companies.length > 0 && (
+          <View style={styles.chipsContainer}>
+            {companies.map((company) => {
+              const isSelected = selectedCompany === company.name;
+
+              return (
+                <TouchableOpacity
+                  key={company.id}
+                  style={[styles.chip, isSelected && styles.chipSelected]}
+                  onPress={() => onSelectCompany(company)}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      isSelected && styles.chipTextSelected,
+                    ]}
+                  >
+                    {company.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+
+      {selectionError.length > 0 && (
+        <Text style={styles.errorText}>{selectionError}</Text>
+      )}
+
+      <TouchableOpacity
+        style={[styles.button, isViewDisabled && styles.buttonDisabled]}
+        onPress={onViewHolidays}
+        disabled={isViewDisabled}
+      >
         <Text style={styles.buttonText}>View holidays</Text>
         <MaterialIcons name="arrow-forward" size={22} color="#FFFFFF" />
       </TouchableOpacity>
@@ -118,6 +157,18 @@ const styles = StyleSheet.create({
     gap: 10,
   },
 
+  stateText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+
+  errorText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#DC2626',
+  },
+
   chip: {
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -151,6 +202,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
     marginTop: 22,
+  },
+
+  buttonDisabled: {
+    backgroundColor: '#94A3B8',
   },
 
   buttonText: {

@@ -11,42 +11,44 @@ import { CompanySearchIntro } from '../components/company/CompanySearchIntro';
 import { GlobalTrendsCard } from '../components/company/GlobalTrendsCard';
 import { Company, getCompanies } from '../lib/companyService';
 
-const fallbackCompanies: Company[] = [
-  { id: 'infosys', name: 'Infosys' },
-  { id: 'tcs', name: 'TCS' },
-  { id: 'wipro', name: 'Wipro' },
-  { id: 'accenture', name: 'Accenture' },
-  { id: 'google', name: 'Google' },
-  { id: 'microsoft', name: 'Microsoft' },
-];
-
 export default function CompanySearchScreen() {
   const router = useRouter();
 
   const [companyName, setCompanyName] = useState('');
   const [selectedCompany, setSelectedCompany] = useState('');
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
-  const [companies, setCompanies] = useState<Company[]>(fallbackCompanies);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [isLoadingCompanies, setIsLoadingCompanies] = useState(true);
+  const [companyLoadError, setCompanyLoadError] = useState('');
+  const [selectionError, setSelectionError] = useState('');
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadCompanies() {
       try {
+        setIsLoadingCompanies(true);
+        setCompanyLoadError('');
+
         const firebaseCompanies = await getCompanies();
         const displayCompanies = firebaseCompanies.filter(
           (company) =>
             typeof company.name === 'string' && company.name.trim().length > 0
         );
 
-        if (isMounted && displayCompanies.length > 0) {
+        if (isMounted) {
           setCompanies(displayCompanies);
         }
       } catch (error) {
-        console.warn('Using fallback company list:', error);
+        console.warn('Unable to load company list:', error);
 
         if (isMounted) {
-          setCompanies(fallbackCompanies);
+          setCompanies([]);
+          setCompanyLoadError('Unable to load companies. Please try again.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingCompanies(false);
         }
       }
     }
@@ -60,6 +62,7 @@ export default function CompanySearchScreen() {
 
   const handleChangeCompany = (value: string) => {
     setCompanyName(value);
+    setSelectionError('');
 
     if (value !== selectedCompany) {
       setSelectedCompany('');
@@ -71,24 +74,37 @@ export default function CompanySearchScreen() {
     setSelectedCompany(company.name);
     setSelectedCompanyId(company.id);
     setCompanyName(company.name);
-  };
-
-  const getCompanyId = (company: string) => {
-    return company.toLowerCase().replace(/\s+/g, '-');
+    setSelectionError('');
   };
 
   const handleViewHolidays = () => {
-    const company = selectedCompany || 'Infosys';
-    const companyId = selectedCompanyId || getCompanyId(company);
+    const typedCompanyName = companyName.trim().toLowerCase();
+    const matchedCompany =
+      companies.find((company) => company.id === selectedCompanyId) ??
+      companies.find(
+        (company) => company.name.trim().toLowerCase() === typedCompanyName
+      );
+
+    if (!matchedCompany) {
+      setSelectionError('Please select a company from the list.');
+      return;
+    }
 
     router.push({
       pathname: '/company-holidays',
       params: {
-        companyId,
-        companyName: company,
+        companyId: matchedCompany.id,
+        companyName: matchedCompany.name,
       },
     });
   };
+
+  const searchText = companyName.trim().toLowerCase();
+  const visibleCompanies = searchText
+    ? companies.filter((company) =>
+        company.name.trim().toLowerCase().includes(searchText)
+      )
+    : companies;
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -104,7 +120,11 @@ export default function CompanySearchScreen() {
         <CompanySearchCard
           companyName={companyName}
           selectedCompany={selectedCompany}
-          companies={companies}
+          companies={visibleCompanies}
+          isLoadingCompanies={isLoadingCompanies}
+          companyLoadError={companyLoadError}
+          selectionError={selectionError}
+          isViewDisabled={isLoadingCompanies || companies.length === 0}
           onChangeCompany={handleChangeCompany}
           onSelectCompany={handleSelectCompany}
           onViewHolidays={handleViewHolidays}

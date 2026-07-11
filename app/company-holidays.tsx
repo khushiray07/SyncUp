@@ -12,30 +12,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CompanyHoliday, getCompanyHolidays } from '../lib/companyService';
 
-const fallbackHolidaysByCompany: Record<string, CompanyHoliday[]> = {
-  infosys: [
-    {
-      id: 'diwali',
-      title: 'Diwali',
-      date: '2024-10-31',
-      type: 'Festival',
-    },
-    {
-      id: 'new-year',
-      title: 'New Year',
-      date: '2026-01-01',
-      type: 'Public Holiday',
-    },
-    {
-      id: 'holi',
-      title: 'Holi',
-      date: '2026-03-25',
-      type: 'Festival',
-    },
-  ],
-};
-const emptyHolidays: CompanyHoliday[] = [];
-
 const monthLabels = [
   'JAN',
   'FEB',
@@ -80,19 +56,16 @@ export default function CompanyHolidaysScreen() {
 
   const selectedCompanyId =
     typeof params.companyId === 'string' && params.companyId.trim()
-      ? params.companyId.trim().toLowerCase()
-      : 'infosys';
+      ? params.companyId.trim()
+      : '';
 
   const companyName =
     typeof params.companyName === 'string' && params.companyName.trim()
       ? params.companyName
-      : 'Infosys';
+      : 'selected company';
 
-  const fallbackHolidays =
-    fallbackHolidaysByCompany[selectedCompanyId] ?? emptyHolidays;
-  const [holidays, setHolidays] =
-    useState<CompanyHoliday[]>(fallbackHolidays);
-  const [isLoading, setIsLoading] = useState(fallbackHolidays.length === 0);
+  const [holidays, setHolidays] = useState<CompanyHoliday[]>([]);
+  const [isLoading, setIsLoading] = useState(selectedCompanyId.length > 0);
   const [hasError, setHasError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -100,27 +73,30 @@ export default function CompanyHolidaysScreen() {
     let isMounted = true;
 
     async function loadHolidays() {
+      if (!selectedCompanyId) {
+        setIsLoading(false);
+        setHasError(true);
+        setHolidays([]);
+        return;
+      }
+
       try {
-        setIsLoading(fallbackHolidays.length === 0);
+        setIsLoading(true);
         setHasError(false);
-        setHolidays(fallbackHolidays);
+        setHolidays([]);
 
         const firebaseHolidays = await getCompanyHolidays(selectedCompanyId);
 
         if (isMounted) {
-          setHolidays(
-            firebaseHolidays.length > 0 ? firebaseHolidays : fallbackHolidays
-          );
+          setHolidays(firebaseHolidays);
         }
       } catch (error) {
         if (isMounted) {
-          setHasError(fallbackHolidays.length === 0);
-          setHolidays(fallbackHolidays);
+          setHasError(true);
+          setHolidays([]);
         }
 
-        if (fallbackHolidays.length === 0) {
-          console.warn(`Unable to load holidays for ${selectedCompanyId}:`, error);
-        }
+        console.warn(`Unable to load holidays for ${selectedCompanyId}:`, error);
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -133,7 +109,7 @@ export default function CompanyHolidaysScreen() {
     return () => {
       isMounted = false;
     };
-  }, [fallbackHolidays, reloadKey, selectedCompanyId]);
+  }, [reloadKey, selectedCompanyId]);
 
   const displayedYear =
     holidays
